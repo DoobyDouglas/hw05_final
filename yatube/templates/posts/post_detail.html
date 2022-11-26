@@ -1,0 +1,63 @@
+<!-- templates/posts/post_detail.html -->
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %}
+  <title>
+    Пост: {{ post.text|truncatechars:30 }}
+  </title>
+{% endblock %}
+{% block content %} 
+  <main>
+    <div class="row">
+      <aside class="col-12 col-md-3">
+        <div class="row justify-content-center">
+          <div class="col-md-8 p-5">
+            <div class="card">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  Дата публикации: {{ post.pub_date|date:"d E Y" }} 
+                </li>
+                {% if post.group %}   
+                  <li class="list-group-item">
+                    Группа: {{ post.group.title }}<br>
+                  <a href="{% url 'posts:group_list' post.group.slug %}">
+                    все записи группы
+                  </a>
+                  </li>
+                {% endif %}
+                <li class="list-group-item">
+                  Автор: {{ post.author.get_full_name }}<br>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  Всего постов автора:  <span >{{ count }}</span>
+                </li>
+                <li class="list-group-item">
+                  <a href="{% url 'posts:profile' post.author.username %}">
+                    все посты пользователя
+                  </a>
+                </li>
+              </ul>
+            </div>  
+          </div>
+        </div>
+      </aside>
+      <article class="col-12 col-md-9">
+        <div class="row justify-content-center">
+          <div class="col-md-8 p-5">
+            <div class="card">
+            {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+              <img class="card-img my-2" src="{{ im.url }}">
+            {% endthumbnail %}
+              <div class="card-header">
+                <p>
+                  {{ post.text }}
+                </p>
+              </div>
+            </div>
+          </div>   
+        </div>   
+      </article>
+      {% include 'posts/post_comment.html' %} 
+    </div> 
+  </main>
+{% endblock %}
