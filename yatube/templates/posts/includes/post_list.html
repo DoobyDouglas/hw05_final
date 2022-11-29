@@ -18,8 +18,13 @@
         <p>{{ post.text }}</p>
         <a href="{% url 'posts:profile' post.author.username %}">все посты пользователя</a><br>    
         {% if post.group %}   
-          <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+          <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a><br> 
         {% endif %}
+        <br> 
+        <a class="nav-link" 
+          href="{% url 'posts:post_detail' post.id %}"
+        >
+        <button type="submit" class="btn btn-primary">Детали</button>
         {% if not forloop.last %}<hr>{% endif %}
       </div>
     </div>

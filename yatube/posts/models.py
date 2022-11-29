@@ -76,7 +76,7 @@ class Comment(CreatedModel):
         return self.text[:15]
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ['pub_date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 

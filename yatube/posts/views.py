@@ -5,7 +5,7 @@ from posts.forms import PostForm, CommentForm
 from django.core.paginator import Paginator
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
-from django.views.decorators.cache import cache_page
+
 
 User = get_user_model()
 
@@ -23,6 +23,7 @@ def paginator(request, post_list, page) -> Paginator:
 # Cтраница профиля
 def profile(request, username):
     template = 'posts/profile.html'
+    user = request.user
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
     page_obj = paginator(request, post_list, 'page')
@@ -32,10 +33,15 @@ def profile(request, username):
         ).exists()
     else:
         following = False
+    if user != author:
+        follow_button = True
+    else:
+        follow_button = False
     context = {
         'author': author,
         'page_obj': page_obj,
         'following': following,
+        'follow_button': follow_button,
     }
     return render(request, template, context)
 
@@ -58,7 +64,6 @@ def post_detail(request, post_id):
 
 
 # Главная страница
-@cache_page(20)
 def index(request):
     template = 'posts/index.html'
     title = 'Последние обновления на сайте'

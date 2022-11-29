@@ -11,13 +11,10 @@
       <h1>Последние обновления на сайте</h1>
       <hr> 
       <article>
-        {% load cache %}
-        {% cache 20 index_page %}
         {% include 'posts/includes/switcher.html' %}
         {% for post in page_obj %}
-        {% include 'posts/includes/post_list.html' %}       
+        {% include 'posts/includes/post_list.html' %}
         {% endfor %}
-        {% endcache %}  
         <hr>         
       </article>
     </div>
