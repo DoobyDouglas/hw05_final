@@ -57,7 +57,6 @@ class PostFormTests(TestCase):
         )
         form_data = {
             'text': 'Тестовый текст',
-            'group': self.group.id,
             'image': uploaded,
         }
         response = self.authorized_client.post(
@@ -71,9 +70,20 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertTrue(Post.objects.filter(
             text='Тестовый текст',
-            group=self.group.id,
             image='posts/small.gif',
         ).exists())
+        form_data = {
+            'text': 'Тестовый текст 2',
+            'group': self.group.id,
+        }
+        response = self.authorized_client.post(
+            reverse('posts:create'),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(
+            response, reverse('posts:group_list',
+                              kwargs={'slug': f'{self.group.slug}'}))
         response = self.guest_client.post(
             reverse('posts:create'),
             data=form_data,

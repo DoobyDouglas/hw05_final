@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from core.models import CreatedModel
 from django.contrib.auth import get_user_model
 
@@ -44,6 +45,9 @@ class Post(CreatedModel):
         blank=True
     )
 
+    def get_absolute_url(self):
+        return reverse('posts:post_detail', kwargs={'post_id': self.id})
+
     def __str__(self):
         return self.text[:15]
 
@@ -71,6 +75,9 @@ class Comment(CreatedModel):
         verbose_name='Текст комментария',
         help_text='Введите текст комментария'
     )
+
+    def get_absolute_url(self):
+        return reverse('posts:post_detail', kwargs={'post_id': self.post.id})
 
     def __str__(self):
         return self.text[:15]
