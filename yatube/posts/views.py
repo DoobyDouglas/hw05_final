@@ -1,11 +1,11 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Post, Group, Follow, Comment
+from .models import Post, Group, Follow
 from posts.forms import PostForm, CommentForm
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import View
 from django.urls import reverse
 
 User = get_user_model()
@@ -31,7 +31,6 @@ class Index(ListView):
 # Профиль
 class Profile(ListView):
     template_name = 'posts/profile.html'
-    model = Post
     slug_url_kwarg = 'username'
     paginate_by = POSTS_ON_PAGE
 
@@ -83,7 +82,6 @@ class PostDetail(DetailView):
 # Группа
 class GroupPosts(ListView):
     template_name = 'posts/group_list.html'
-    model = Post
     paginate_by = POSTS_ON_PAGE
 
     def get_queryset(self):
@@ -103,7 +101,6 @@ class GroupPosts(ListView):
 # Создание поста
 class PostCreate(CreateView, LoginRequiredMixin):
     template_name = 'posts/create_post.html'
-    model = Post
     form_class = PostForm
 
     def get_context_data(self, **kwargs):
@@ -168,7 +165,6 @@ class PostEdit(UpdateView, LoginRequiredMixin):
 # Комментарии к посту
 class AddComment(CreateView, LoginRequiredMixin):
     template_name = 'posts/post_comment.html'
-    model = Comment
     form_class = CommentForm
     pk_url_kwarg = 'post_id'
 
@@ -188,34 +184,48 @@ class AddComment(CreateView, LoginRequiredMixin):
 
 
 # Cтраница ленты
-@login_required
-def follow_index(request):
-    template = 'posts/follow.html'
-    post_list = Post.objects.filter(author__following__user=request.user)
-    page_obj = paginator(request, post_list, 'page')
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, template, context)
+class FollowIndex(ListView, LoginRequiredMixin):
+    template_name = 'posts/follow.html'
+    paginate_by = POSTS_ON_PAGE
+
+    def get_queryset(self):
+        return Post.objects.filter(author__following__user=self.request.user)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
 
 
 # Подписка
-@login_required
-def profile_follow(request, username):
-    user = request.user
-    author = get_object_or_404(User, username=username)
-    follow = Follow.objects.filter(user=user, author=author)
-    if user != author and not follow.exists():
-        Follow.objects.create(user=user, author=author)
-    return redirect('posts:profile', username=author.username)
+class ProfileFollow(View, LoginRequiredMixin):
+
+    def get(self, request, username):
+        user = request.user
+        author = get_object_or_404(User, username=username)
+        follow = Follow.objects.filter(user=user, author=author)
+        if user != author and not follow.exists():
+            Follow.objects.create(user=user, author=author)
+        return redirect('posts:profile', username=author.username)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
 
 
 # Отписка
-@login_required
-def profile_unfollow(request, username):
-    user = request.user
-    author = get_object_or_404(User, username=username)
-    follow = Follow.objects.filter(user=user, author=author)
-    if follow.exists():
-        follow.delete()
-    return redirect('posts:profile', username=user.username)
+class ProfileUnfollow(View, LoginRequiredMixin):
+
+    def get(self, request, username):
+        user = request.user
+        author = get_object_or_404(User, username=username)
+        follow = Follow.objects.filter(user=user, author=author)
+        if follow.exists():
+            follow.delete()
+        return redirect('posts:profile', username=author.username)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)

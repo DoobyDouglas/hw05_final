@@ -15,15 +15,15 @@ urlpatterns = [
          name='post_edit'),
     path('posts/<int:post_id>/comment/',
          views.AddComment.as_view(), name='add_comment'),
-    path('follow/', views.follow_index, name='follow_index'),
+    path('follow/', views.FollowIndex.as_view(), name='follow_index'),
     path(
         'profile/<str:username>/follow/',
-        views.profile_follow,
+        views.ProfileFollow.as_view(),
         name='profile_follow'
     ),
     path(
         'profile/<str:username>/unfollow/',
-        views.profile_unfollow,
+        views.ProfileUnfollow.as_view(),
         name='profile_unfollow'
     ),
 ]

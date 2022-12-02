@@ -1,5 +1,6 @@
 <!-- templates/posts/create_post.html -->
 {% extends 'base.html' %}
+{% load thumbnail %}
 {% block title %}
 {% if is_edit %}
     <title>
@@ -32,9 +33,18 @@
             {% endif %}     
               {% csrf_token %}         
               <div class="form-group row my-3 p-3">
+                {% if post.image %}
+                  {% if is_edit %}
+                    <div class="card">
+                    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+                      <img class="card-img my-2" src="{{ im.url }}">
+                    {% endthumbnail %}
+                    </div>
+                  {% endif %}
+                {% endif %}  
                 <label for="id_text">
                   Текст поста                  
-                  <span class="required text-danger" >*</span>                  
+                  <span class="required text-danger" >*</span>                
                 </label> 
                   {{ form.text }}                   
                 <small id="id_text-help" class="form-text text-muted">
@@ -57,18 +67,35 @@
                   Группа, к которой будет относиться пост
                 </small>
               </div>
-              <div class="form-group row my-3 p-3">
-                <label for="id_image">
-                  Картинка                      
-                </label>
+              <div class="form-group row my-3 p-3"> 
                 {% if is_edit %}
-                  На данный момент: <a href="/media/{{ post.image.name }}"> {{ post.image.name }}</a>
-                  <input type="checkbox" name="image-clear" id="image-clear_id">
-                  <label for="image-clear_id">Очистить</label><br>
-                  <input type="file" name="image" accept="image/*" class="form-control" id="id_image"> 
+                  {% if post.image %}
+                    <div class="card">
+                      <label for="id_image">
+                        Картинка поста:                 
+                      </label> <a href="/media/{{ post.image.name }}"> {{ post.image.name }}</a>
+                      <label for="image-clear_id">Очистить:</label>
+                      <p>
+                      <input type="checkbox" name="image-clear" id="image-clear_id">
+                      <input type="file" name="image" accept="image/*" class="form-control" id="id_image">
+                      <p> 
+                    </div>
+                  {% else %}
+                    <label for="id_image">
+                      Картинка                   
+                    </label>
+                    <p>
+                    <p>
+                    <input type="file" name="image" accept="image/*" class="form-control" id="id_image">  
+                  {% endif %}
                 {% else %}
+                  <label for="id_image">
+                    Картинка                   
+                  </label>
+                  <p>
+                  <p>
                   <input type="file" name="image" accept="image/*" class="form-control" id="id_image">                      
-                {% endif %} 
+                {% endif %}
               </div>
               <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">

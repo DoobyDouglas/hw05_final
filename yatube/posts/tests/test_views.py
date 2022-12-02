@@ -320,7 +320,7 @@ class FollowTest(TestCase):
         self.assertRedirects(response, reverse(
             'posts:profile',
             kwargs={
-                'username': f'{self.user_follower.username}'
+                'username': f'{self.user_following.username}'
             })
         )
 
