@@ -31,6 +31,13 @@
           </a>
         </li>
         <li class="nav-item"> 
+          <a class="nav-link {% if view_name == 'posts:group_create' %}active{% endif %}" 
+            href="{% url 'posts:group_create' %}"
+          >
+            Создать группу
+          </a>
+        </li>
+        <li class="nav-item"> 
           <a class="nav-link link-light {% if view_name == 'users:password_change' %}active{% endif %}"
             href="{% url 'users:password_change' %}"
           >
@@ -41,7 +48,11 @@
           <a class="nav-link link-light" href="{% url 'users:logout' %}">Выйти</a>
         </li>
         <li class="nav-item"> 
-          <a class="nav-link link-light" href="{% url 'posts:profile' username=request.user %}">Пользователь: {{ user.username }}</a>
+          <a class="nav-link link-light {% if view_name == 'posts:profile' %}active{% endif %}" 
+            href="{% url 'posts:profile' username=request.user %}"
+          >
+            Пользователь: {{ user.username }}
+          </a>
         </li>
         {% else %}
         <li class="nav-item"> 

@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Post, Group, Follow
-from posts.forms import PostForm, CommentForm
-from django.core.paginator import Paginator
+from posts.forms import PostForm, CommentForm, GroupForm
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views.generic import View
@@ -14,18 +13,17 @@ User = get_user_model()
 POSTS_ON_PAGE = 10
 
 
-# Пэйджинатор
-def paginator(request, post_list, page) -> Paginator:
-    paginator = Paginator(post_list, POSTS_ON_PAGE)
-    page_number = request.GET.get('page')
-    return paginator.get_page(page_number)
-
-
 # Главная
 class Index(ListView):
     template_name = 'posts/index.html'
     model = Post
     paginate_by = POSTS_ON_PAGE
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'index': True,
+        }
+        return super().get_context_data(**context)
 
 
 # Профиль
@@ -104,9 +102,7 @@ class PostCreate(CreateView, LoginRequiredMixin):
     form_class = PostForm
 
     def get_context_data(self, **kwargs):
-        form = PostForm()
         context = {
-            'form': form,
             'is_edit': False,
         }
         return super().get_context_data(**context)
@@ -191,6 +187,12 @@ class FollowIndex(ListView, LoginRequiredMixin):
     def get_queryset(self):
         return Post.objects.filter(author__following__user=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = {
+            'follow': True,
+        }
+        return super().get_context_data(**context)
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
@@ -229,3 +231,32 @@ class ProfileUnfollow(View, LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
+
+
+# Создание группы
+class GroupCreate(CreateView, LoginRequiredMixin):
+    template_name = 'posts/create_group.html'
+    form_class = GroupForm
+
+    def form_valid(self, form):
+        group = form.save(commit=False)
+        group.save()
+        return super().form_valid(form)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+# Список групп
+class GroupIndex(ListView):
+    template_name = 'posts/groups.html'
+    model = Group
+    paginate_by = POSTS_ON_PAGE
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'groups': True,
+        }
+        return super().get_context_data(**context)

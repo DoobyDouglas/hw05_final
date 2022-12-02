@@ -9,7 +9,13 @@ User = get_user_model()
 class Group(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
-    description = models.TextField()
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    def get_absolute_url(self):
+        return reverse('posts:group_list', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.title

@@ -18,6 +18,14 @@
           Избранные авторы
         </a>
       </li>
+      <li class="nav-item">
+        <a 
+           class="nav-link {% if groups %}active{% endif %}"
+           href="{% url 'posts:group_index' %}"
+        >
+          Группы
+        </a>
+      </li>
     </ul>
   </div>
 {% endif %}
