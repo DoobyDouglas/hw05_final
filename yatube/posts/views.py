@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Post, Group, Follow
+from users.models import Profile as P
 from posts.forms import PostForm, CommentForm, GroupForm
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
@@ -38,6 +39,7 @@ class Profile(ListView):
     def get_context_data(self, **kwargs):
         user = self.request.user
         author = get_object_or_404(User, username=self.kwargs['username'])
+        profile = P.objects.get(user=author)
         if self.request.user.is_authenticated:
             following = Follow.objects.filter(
                 user=user, author=author
@@ -52,6 +54,7 @@ class Profile(ListView):
             'author': author,
             'following': following,
             'follow_button': follow_button,
+            'profile': profile
         }
         return super().get_context_data(**context)
 
